@@ -11,6 +11,7 @@ from itertools import product
 
 idDict = {}
 defDict = defaultdict(list)
+expandDict = defaultdict(list)
 tempDict = {}
 
 tokenDict = {}
@@ -201,8 +202,47 @@ class CustomVisitor(epVisitor):
             tokenDict[c.accept(self).value] = [-1,-1,-1]
         return components
 
+def expand():
+    for id,values in defDict.items():
+        #print(id,values)
+        name = values[0]
+        components = []
+        if (name.type == 'id'):
+            name = defDict[name.value.value][0].value
+        else:
+            name = name.value
 
-    
+        for n in name:
+            components.append(n.value)
+        print(components)
+        
+        grans = values[1]
+        granularities = []
+        for gran in grans:
+            granularity = []
+            if (type(gran.value) == list):
+                for g in gran.value:
+                    granularity.append(g.value)
+            #for g in granularity:
+                #print(g.value)
+            else:
+                granularity.append(gran.value.value)
+            granularities.append(granularity)
+        print(granularities)
+        
+        #print(grans)
+        ### NEED TO HANDLE THE CONSTRAINTS PART
+        cons = values[2][0]
+        for k,v in cons.items():
+            #print(k,v)
+            for i in v:
+                new = list(map(lambda x: x.replace(k, i), components))
+                #print(new)
+                
+            
+        
+        
+        
 def get_parse_tree(file_name):
     schema_src_code = FileStream(file_name)
     lexer = epLexer(schema_src_code)
@@ -233,7 +273,8 @@ if err == 0:
     except Exception as e:
         print("\nSyntax error occurred in the policy file!\n")
         sys.exit(1)
-    formatPrint(defDict)
+    #formatPrint(defDict)
+    expand()
 
     
     

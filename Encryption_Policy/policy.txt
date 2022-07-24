@@ -1,0 +1,3 @@
+_network: "Home"
+
+#pub: _network/location/device/events/value ENCRYPTEDBY [_network, _network/location] WHERE {location: "bedroom" | "livingroom"}

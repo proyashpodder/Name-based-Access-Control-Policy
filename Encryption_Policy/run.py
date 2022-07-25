@@ -13,6 +13,7 @@ idDict = {}
 defDict = defaultdict(list)
 expandDict = defaultdict(list)
 tempDict = {}
+KEKDict = defaultdict(list)
 
 tokenDict = {}
 certDict = {}
@@ -213,8 +214,11 @@ def expand():
             name = name.value
 
         for n in name:
-            components.append(n.value)
-        print(components)
+            if(n.value in idDict):
+                components.append(idDict[n.value])
+            else:
+                components.append(n.value)
+        #print(components)
         
         grans = values[1]
         granularities = []
@@ -228,16 +232,49 @@ def expand():
             else:
                 granularity.append(gran.value.value)
             granularities.append(granularity)
-        print(granularities)
+        #print(granularities)
         
         #print(grans)
         ### NEED TO HANDLE THE CONSTRAINTS PART
         cons = values[2][0]
-        for k,v in cons.items():
-            #print(k,v)
+        lis = list(product(*cons.values()))
+        #print(lis)
+        
+        for l in lis:
+            idx = 0
+            temDic = {}
+            for k,v in cons.items():
+                temDic[k] = l[idx]
+                idx += 1
+            #print(temDic)
+            temp = components.copy()
+            #print(temp)
+            for a,b in temDic.items():
+                temp = list(map(lambda x: x.replace(a, b), temp))
+            #print(temp)
+            
+            res = ''
+            for t in temp:
+                res += '/'+t
+            #print(res)
+            
+            tempGrans = []
+            for gran in granularities:
+                tempGran = gran.copy()
+                for a,b in temDic.items():
+                    tempGran = list(map(lambda x: x.replace(a, b), tempGran))
+                g = ''
+                for t in tempGran:
+                    g += '/'+t
+                KEKDict[res].append(g)
+                
+        
+        '''for k,v in cons.items():
+            print(k,v)
+            
             for i in v:
                 new = list(map(lambda x: x.replace(k, i), components))
-                #print(new)
+                print(new)'''
                 
             
         
@@ -253,7 +290,7 @@ def get_parse_tree(file_name):
     
 def formatPrint(dic):
     for key,val in dic.items():
-        print(key,val)
+        print('{0}  ------->   {1}'.format(key,val))
     print('\n')
     
 def listPrint(l):
@@ -268,13 +305,14 @@ if err == 0:
     visitor = CustomVisitor()
     try:
         tree.accept(visitor)
-        print(idDict)
+        #print(idDict)
 
     except Exception as e:
         print("\nSyntax error occurred in the policy file!\n")
         sys.exit(1)
     #formatPrint(defDict)
     expand()
+    formatPrint(KEKDict)
 
     
     

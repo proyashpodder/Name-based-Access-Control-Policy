@@ -89,6 +89,11 @@ class epVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by epParser#variable.
+    def visitVariable(self, ctx:epParser.VariableContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by epParser#slash.
     def visitSlash(self, ctx:epParser.SlashContext):
         return self.visitChildren(ctx)

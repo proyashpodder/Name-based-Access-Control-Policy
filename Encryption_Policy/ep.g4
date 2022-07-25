@@ -10,7 +10,7 @@ name: (component slash)+ component;
 
 component: literal | identifier | function;
 
-identifier: STRING | ustring | hstring;
+identifier: STRING | ustring | hstring | variable;
 
 literal: (AP)(STRING)(AP);
 
@@ -83,9 +83,13 @@ ustring: (UNDERSCORE)(STRING);
 
 hstring: (HASH)(STRING);
 
+variable: (VAR)(STRING);
+
 UNDERSCORE: '_';
 
 HASH: '#';
+
+VAR: '$';
 
 SIGNEDBY: '<=';
 

@@ -1,5 +1,5 @@
 _network: "Home"
 
-#pub: _network/location/device/events/value ENCRYPTEDBY [_network, _network/location] WHERE {location: "bedroom" | "livingroom", device:"light" | "thermostat"}
+#pub: _network/$location/$device/events/value ENCRYPTEDBY [_network, _network/location] WHERE {location: "bedroom" | "livingroom", device:"light" | "thermostat"}
 
 bedroomPub: #pub ENCRYPTEDBY [_network/location] WHERE {location: "bedroom", device:"light" | "thermostat"}

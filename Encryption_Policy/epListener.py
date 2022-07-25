@@ -152,6 +152,15 @@ class epListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by epParser#variable.
+    def enterVariable(self, ctx:epParser.VariableContext):
+        pass
+
+    # Exit a parse tree produced by epParser#variable.
+    def exitVariable(self, ctx:epParser.VariableContext):
+        pass
+
+
     # Enter a parse tree produced by epParser#slash.
     def enterSlash(self, ctx:epParser.SlashContext):
         pass

@@ -126,6 +126,10 @@ class CustomVisitor(epVisitor):
             id.type = 'hString'
             id.value = ctx.hstring().accept(self)
             
+        elif (ctx.variable()):
+            id.type = 'variable'
+            id.value = ctx.variable().accept(self)
+            
         return id
             
     def visitConstraints(self, ctx:epParser.ConstraintsContext):
@@ -174,6 +178,9 @@ class CustomVisitor(epVisitor):
         
     def visitHstring(self, ctx:epParser.HstringContext):
         return ctx.HASH().getText() + ctx.STRING().getText()
+    
+    def visitVariable(self, ctx:epParser.VariableContext):
+        return ctx.STRING().getText()
         
     def visitLiteral(self, ctx:epParser.LiteralContext):
         tokenDict[ctx.STRING().getText()] = [-1,-1,-1]
@@ -216,8 +223,10 @@ def expand():
         for n in name:
             if(n.value in idDict):
                 components.append(idDict[n.value])
-            else:
+            elif(n.type == 'variable'):
                 components.append(n.value)
+            else:
+                components.append('_')
         #print(components)
         
         grans = values[1]

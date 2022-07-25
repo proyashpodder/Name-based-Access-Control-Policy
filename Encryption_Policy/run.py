@@ -265,16 +265,12 @@ def expand():
                     tempGran = list(map(lambda x: x.replace(a, b), tempGran))
                 g = ''
                 for t in tempGran:
-                    g += '/'+t
-                KEKDict[res].append(g)
-                
-        
-        '''for k,v in cons.items():
-            print(k,v)
-            
-            for i in v:
-                new = list(map(lambda x: x.replace(k, i), components))
-                print(new)'''
+                    if(t in idDict):
+                        g+= '/'+idDict[t]
+                    else:
+                        g += '/'+t
+                tempGrans.append(g)
+            KEKDict[res] = tempGrans
                 
             
         

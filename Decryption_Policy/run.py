@@ -15,6 +15,8 @@ expandDict = defaultdict(list)
 tempDict = {}
 tempRoleDict = defaultdict(list)
 tempRuleDict = defaultdict(list)
+BaseDict = defaultdict(list)
+roleDict = defaultdict(list)
 #tempRoleDict[1].append = 2
 KEKDict = defaultdict(list)
 
@@ -86,10 +88,13 @@ class CustomVisitor(dpVisitor):
             exp = ctx.expression().accept(self)
             constraints = ctx.constraints().accept(self) if ctx.constraints() else None
             #encryptor = ctx.encryptor().accept(self) if ctx.encryptor() else None
-
-            tempRoleDict[id.value].append(exp)
-            tempRoleDict[id.value].append(constraints)
-            #tempRoleDict[id.value].append(encryptor)
+            if(id.type == 'hString'):
+                BaseDict[id.value].append(exp)
+                BaseDict[id.value].append(constraints)
+            else:
+                tempRoleDict[id.value].append(exp)
+                tempRoleDict[id.value].append(constraints)
+                #tempRoleDict[id.value].append(encryptor)
     def visitRulePolicy(self, ctx:dpParser.RulePolicyContext):
         id = ctx.identifier().accept(self)
         if(id.type == 'uString'):
@@ -286,8 +291,34 @@ def expand():
                 tempGrans.append(g)
             KEKDict[res] = tempGrans
                 
-            
+def buildRoleDict():
+    for id,values in tempRoleDict.items():
+        name = values[0]
+        components = []
+        if (name.type == 'id'):
+            name = BaseDict[name.value.value][0].value
+        else:
+            name = name.value
+
+        for n in name:
+            if(n.value in idDict):
+                components.append(idDict[n.value])
+            else:
+                components.append(n.value)
         
+        cons = values[1][0]
+        lis = list(product(*cons.values()))
+        
+        for l in lis:
+            idx = 0
+            temDic = {}
+            for k,v in cons.items():
+                temDic[k] = l[idx]
+                idx += 1
+            temp = components.copy()
+            for a,b in temDic.items():
+                temp = list(map(lambda x: x.replace(a, b), temp))
+            roleDict[id].append(temp)
         
         
 def get_parse_tree(file_name):
@@ -320,10 +351,15 @@ if err == 0:
     except Exception as e:
         print("\nSyntax error occurred in the policy file!\n")
         sys.exit(1)
-    formatPrint(tempRoleDict)
-    formatPrint(tempRuleDict)
+    #formatPrint(tempRoleDict)
+    #formatPrint(tempRuleDict)
+    #formatPrint(BaseDict)
     #expand()
     #formatPrint(KEKDict)
+    
+    buildRoleDict()
+    
+    formatPrint(roleDict)
 
     
     

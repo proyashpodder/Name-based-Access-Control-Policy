@@ -1,0 +1,6 @@
+_network: "Home"
+#user : home/user/userID/KEY
+
+ownerRole: #user WHERE {userID:"Alice"}
+
+ownerRule : [_network, _network/location WHERE {location: "bedroom"}] ENCRYPTEDBY ownerRole | guestrole

@@ -17,8 +17,9 @@ tempRoleDict = defaultdict(list)
 tempRuleDict = defaultdict(list)
 BaseDict = defaultdict(list)
 roleDict = defaultdict(list)
+ruleDict = defaultdict(list)
 #tempRoleDict[1].append = 2
-KEKDict = defaultdict(list)
+KDKDict = defaultdict(list)
 
 tokenDict = {}
 certDict = {}
@@ -82,6 +83,8 @@ class CustomVisitor(dpVisitor):
         
     def visitRolePolicy(self, ctx:dpParser.RolePolicyContext):
         id = ctx.identifier().accept(self)
+        
+        print(id.value)
         if(id.type == 'uString'):
             idDict[id.value] = ctx.expression().accept(self).value
         else:
@@ -89,16 +92,19 @@ class CustomVisitor(dpVisitor):
             constraints = ctx.constraints().accept(self) if ctx.constraints() else None
             #encryptor = ctx.encryptor().accept(self) if ctx.encryptor() else None
             if(id.type == 'hString'):
+                print("hols")
                 BaseDict[id.value].append(exp)
                 BaseDict[id.value].append(constraints)
             else:
+                print(id.value)
                 tempRoleDict[id.value].append(exp)
                 tempRoleDict[id.value].append(constraints)
                 #tempRoleDict[id.value].append(encryptor)
     def visitRulePolicy(self, ctx:dpParser.RulePolicyContext):
         id = ctx.identifier().accept(self)
         if(id.type == 'uString'):
-            idDict[id.value] = ctx.expression().accept(self).value
+            print("HOLA")
+            #idDict[id.value] = ctx.expression().accept(self).value
         else:
             grans = ctx.granularities().accept(self)
             #constraints = ctx.constraints().accept(self) if ctx.constraints() else None
@@ -132,7 +138,7 @@ class CustomVisitor(dpVisitor):
     def visitEncryptor(self, ctx:dpParser.EncryptorContext):
         en = []
         for e in ctx.identifier():
-            en.append(e)
+            en.append(e.accept(self))
         return en
             
     def visitConstraints(self, ctx:dpParser.ConstraintsContext):
@@ -293,6 +299,7 @@ def expand():
                 
 def buildRoleDict():
     for id,values in tempRoleDict.items():
+        print(id,values)
         name = values[0]
         components = []
         if (name.type == 'id'):
@@ -305,7 +312,7 @@ def buildRoleDict():
                 components.append(idDict[n.value])
             else:
                 components.append(n.value)
-        
+        print(components)
         cons = values[1][0]
         lis = list(product(*cons.values()))
         
@@ -319,7 +326,62 @@ def buildRoleDict():
             for a,b in temDic.items():
                 temp = list(map(lambda x: x.replace(a, b), temp))
             roleDict[id].append(temp)
-        
+            
+def buildRuleDict():
+    for id,values in tempRuleDict.items():
+        grans = values[0]
+        print(id,values)
+        temps = []
+        for gran in grans:
+            components = []
+            name = gran[0]
+            cons = gran[1][0] if gran[1] else None
+            
+            if (name.type == 'id'):
+                name = idDict[name.value.value]
+                components.append(name)
+            else:
+                name = name.value
+                for n in name:
+                    if(n.value in idDict):
+                        components.append(idDict[n.value])
+                    else:
+                        components.append(n.value)
+            #print(components)
+            
+            if(cons):
+                lis = list(product(*cons.values()))
+                print(lis)
+                for l in lis:
+                    idx = 0
+                    temDic = {}
+                    for k,v in cons.items():
+                        temDic[k] = l[idx]
+                        idx += 1
+                    temp = components.copy()
+                    for a,b in temDic.items():
+                        temp = list(map(lambda x: x.replace(a, b), temp))
+                    ruleDict[id].append(temp)
+                    temps.append(temp)
+            else:
+                ruleDict[id].append(components)
+                temps.append(components)
+                
+        print(temps)
+        encryptors = values[1]
+        for encryptor in encryptors:
+            encryptor = encryptor.value
+            if(encryptor in roleDict):
+                vals = roleDict[encryptor]
+                for val in vals:
+                    key = ''
+                    for v in val:
+                        key += '/'+v
+                    for temp in temps:
+                        res = ''
+                        for t in temp:
+                            res += '/'+ t
+                        KDKDict[key].append(res)
         
 def get_parse_tree(file_name):
     schema_src_code = FileStream(file_name)
@@ -351,15 +413,21 @@ if err == 0:
     except Exception as e:
         print("\nSyntax error occurred in the policy file!\n")
         sys.exit(1)
-    #formatPrint(tempRoleDict)
+    formatPrint(tempRoleDict)
     #formatPrint(tempRuleDict)
-    #formatPrint(BaseDict)
+    formatPrint(BaseDict)
     #expand()
     #formatPrint(KEKDict)
     
     buildRoleDict()
     
-    formatPrint(roleDict)
+    #formatPrint(roleDict)
+    
+    #buildRuleDict()
+    
+    #formatPrint(ruleDict)
+    
+    #formatPrint(KDKDict)
 
     
     

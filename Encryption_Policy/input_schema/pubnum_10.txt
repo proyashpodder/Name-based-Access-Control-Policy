@@ -1,0 +1,13 @@
+_network: "Home"
+#pub: _network/$location/events/value ENCRYPTEDBY [_network, _network/location] WHERE {location: "bedroom" | "livingroom"}
+louse : #pub ENCRYPTEDBY [location] WHERE {location:" asana"}
+baize : #pub ENCRYPTEDBY [location] WHERE {location:" lithy"}
+zebra : #pub ENCRYPTEDBY [location] WHERE {location:" manto"}
+sesti : #pub ENCRYPTEDBY [location] WHERE {location:" Allen"}
+orsel : #pub ENCRYPTEDBY [location] WHERE {location:" plies"}
+yappy : #pub ENCRYPTEDBY [location] WHERE {location:" cronk"}
+foggy : #pub ENCRYPTEDBY [location] WHERE {location:" cinch"}
+mobby : #pub ENCRYPTEDBY [location] WHERE {location:" canty"}
+first : #pub ENCRYPTEDBY [location] WHERE {location:" smook"}
+Ateba : #pub ENCRYPTEDBY [location] WHERE {location:" burin"}
+njave : #pub ENCRYPTEDBY [location] WHERE {location:" bronc"}

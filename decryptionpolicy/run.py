@@ -5,6 +5,7 @@ from decryptionpolicy.dpParser import dpParser
 from decryptionpolicy.dpVisitor import dpVisitor
 import sys
 import binascii
+#import decryptionpolicy.lib
 from collections import defaultdict
 from ndn.encoding import *
 from itertools import product

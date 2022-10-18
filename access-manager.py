@@ -4,6 +4,7 @@ from ndn.app import NDNApp
 from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
 from decryptionpolicy.run import DecryptionPolicy
+from encryptionpolicy.run import EncryptionPolicy
 import sys
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
@@ -13,8 +14,10 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
 
 
 def main():
-    dp = DecryptionPolicy(sys.argv[1])
-    dic = dp.execute()
+    #dp = DecryptionPolicy(sys.argv[1])
+    #dic = dp.execute()
+    ep = EncryptionPolicy(sys.argv[1])
+    dic = ep.execute()
     
     print(dic)
     app = NDNApp()

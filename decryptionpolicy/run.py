@@ -1,8 +1,9 @@
 from antlr4 import *
-from dpLexer import dpLexer
-from dpListener import dpListener
-from dpParser import dpParser
-from dpVisitor import dpVisitor
+#from decryptionpolicy.dpLexer import dpLexer
+#from decryptionpolicy.dpListener import dpListener
+#from decryptionpolicy.dpParser import dpParser
+#from decryptionpolicy.dpVisitor import dpVisitor
+import lib
 import sys
 import binascii
 from collections import defaultdict
@@ -67,11 +68,11 @@ class Expression:
         self.type = None
         self.value = None
 
-class CustomVisitor(dpVisitor):
+class CustomVisitor(lib.dpVisitor):
     def __init__(self):
         self.statements = []
     
-    def visitPolicy(self, ctx:dpParser.PolicyContext):
+    def visitPolicy(self, ctx:lib.dpParser.PolicyContext):
         policy = Policy()
         policy.name = "Policy"
         s = []
@@ -81,7 +82,7 @@ class CustomVisitor(dpVisitor):
         self.statements.append(policy)
         
         
-    def visitRolePolicy(self, ctx:dpParser.RolePolicyContext):
+    def visitRolePolicy(self, ctx:lib.dpParser.RolePolicyContext):
         id = ctx.identifier().accept(self)
         
         print(id.value)
@@ -100,7 +101,7 @@ class CustomVisitor(dpVisitor):
                 tempRoleDict[id.value].append(exp)
                 tempRoleDict[id.value].append(constraints)
                 #tempRoleDict[id.value].append(encryptor)
-    def visitRulePolicy(self, ctx:dpParser.RulePolicyContext):
+    def visitRulePolicy(self, ctx:lib.dpParser.RulePolicyContext):
         id = ctx.identifier().accept(self)
         if(id.type == 'uString'):
             print("HOLA")
@@ -114,7 +115,7 @@ class CustomVisitor(dpVisitor):
             #tempRoleDict[id.value].append(constraints)
             tempRuleDict[id.value].append(encryptor)
             
-    def visitIdentifier(self, ctx:dpParser.IdentifierContext):
+    def visitIdentifier(self, ctx:lib.dpParser.IdentifierContext):
         id = Identifier()
         
         if(ctx.STRING()):
@@ -135,19 +136,19 @@ class CustomVisitor(dpVisitor):
             
         return id
         
-    def visitEncryptor(self, ctx:dpParser.EncryptorContext):
+    def visitEncryptor(self, ctx:lib.dpParser.EncryptorContext):
         en = []
         for e in ctx.identifier():
             en.append(e.accept(self))
         return en
             
-    def visitConstraints(self, ctx:dpParser.ConstraintsContext):
+    def visitConstraints(self, ctx:lib.dpParser.ConstraintsContext):
         cl = []
         for c in ctx.constraint():
             cl.append(c.accept(self))
         return cl
             
-    def visitConstraint(self, ctx:dpParser.ConstraintContext):
+    def visitConstraint(self, ctx:lib.dpParser.ConstraintContext):
         l = []
         d = {}
         #print(len(ctx.constraint_body()))
@@ -156,7 +157,7 @@ class CustomVisitor(dpVisitor):
             d[i.value] = s
         return d
         
-    def visitConstraint_body(self, ctx:dpParser.Constraint_bodyContext):
+    def visitConstraint_body(self, ctx:lib.dpParser.Constraint_bodyContext):
         id = ctx.identifier().accept(self)
         s = []
         #print(len(ctx.components()))
@@ -168,45 +169,45 @@ class CustomVisitor(dpVisitor):
             s = ctx.function().accept(self)+'()'''
         return id, s
     
-    def visitComponents(self, ctx:dpParser.ComponentsContext):
+    def visitComponents(self, ctx:lib.dpParser.ComponentsContext):
         if(ctx.literal()):
             s = ctx.literal().accept(self)
         elif(ctx.function):
             s = ctx.function().accept(self)+'()'
         return s
         
-    def visitGranularities(self, ctx:dpParser.GranularitiesContext):
+    def visitGranularities(self, ctx:lib.dpParser.GranularitiesContext):
         grans = []
         for i in ctx.granularity():
             grans.append(i.accept(self))
             #certDict[i.accept(self).value] = [-1,-1]
         return grans
     
-    def visitGranularity(self, ctx:dpParser.GranularityContext):
+    def visitGranularity(self, ctx:lib.dpParser.GranularityContext):
         exp = ctx.expression().accept(self)
         constraints = ctx.constraints().accept(self) if ctx.constraints() else None
         
         return (exp,constraints)
         
         
-    def visitUstring(self, ctx:dpParser.UstringContext):
+    def visitUstring(self, ctx:lib.dpParser.UstringContext):
         return ctx.UNDERSCORE().getText() + ctx.STRING().getText()
         
-    def visitHstring(self, ctx:dpParser.HstringContext):
+    def visitHstring(self, ctx:lib.dpParser.HstringContext):
         return ctx.HASH().getText() + ctx.STRING().getText()
     
-    def visitVariable(self, ctx:dpParser.VariableContext):
+    def visitVariable(self, ctx:lib.dpParser.VariableContext):
         return ctx.STRING().getText()
         
-    def visitLiteral(self, ctx:dpParser.LiteralContext):
+    def visitLiteral(self, ctx:lib.dpParser.LiteralContext):
         tokenDict[ctx.STRING().getText()] = [-1,-1,-1]
         literalList.append(ctx.STRING().getText())
         return ctx.STRING().getText()
     
-    def visitFunction(self, ctx:dpParser.FunctionContext):
+    def visitFunction(self, ctx:lib.dpParser.FunctionContext):
         return ctx.STRING().getText()
         
-    def visitExpression(self, ctx:dpParser.ExpressionContext):
+    def visitExpression(self, ctx:lib.dpParser.ExpressionContext):
         e = Expression()
         if (ctx.name()):
             e.value = ctx.name().accept(self)
@@ -219,7 +220,7 @@ class CustomVisitor(dpVisitor):
             e.type = 'literal'
         return e
     
-    def visitName(self, ctx:dpParser.NameContext):
+    def visitName(self, ctx:lib.dpParser.NameContext):
         components = []
         for c in ctx.component():
             components.append(c.accept(self))
@@ -385,9 +386,9 @@ def buildRuleDict():
         
 def get_parse_tree(file_name):
     schema_src_code = FileStream(file_name)
-    lexer = dpLexer(schema_src_code)
+    lexer = lib.dpLexer(schema_src_code)
     stream = CommonTokenStream(lexer)
-    parser = dpParser(stream)
+    parser = lib.dpParser(stream)
     tree = parser.policy()
     return tree, parser.getNumberOfSyntaxErrors()
     

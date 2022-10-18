@@ -3,11 +3,8 @@ from typing import Optional
 from ndn.app import NDNApp
 from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
-#from .run import DecryptionPolicy
-#from decryptionpolicy.run import DecryptionPolicy
-import decryptionpolicy
+from decryptionpolicy.run import DecryptionPolicy
 import sys
-#import decryptionpolicy.lib
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -18,10 +15,12 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
 def main():
     dp = DecryptionPolicy(sys.argv[1])
     dic = dp.execute()
+    
     print(dic)
     app = NDNApp()
     #dic = {'home/user/alice/key':['/home','/home/bedroom'],
     #       'home/user/ruth/key':['home/guestroom'] }
+    #formatPrint(dic)
     #dic = {'/edu/fiu/cs':['/student/proyash','/faculty/alex'],
     #       '/edu/ucla/cs': ['/xinyu']}
 

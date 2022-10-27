@@ -29,13 +29,13 @@ def main():
     app = NDNApp()
     '''#dic = {'home/user/alice/key':['/home','/home/bedroom'],
     #       'home/user/ruth/key':['home/guestroom'] }
-    #formatPrint(dic)
+    #formatPrint(dic)'''
     #dic = {'/edu/fiu/cs':['/student/proyash','/faculty/alex'],
-    #       '/edu/ucla/cs': ['/xinyu']}'''
-
+    #       '/edu/ucla/cs': ['/xinyu']}
+    # the consumer gets timeout. Maybe the issue can be wityh _ thing. check by removing that
     for key,val in kekDic.items():
+        print(key,val)
         @app.route(key)
-        
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
             n = Name.to_str(name)
             print(f'>> I: {Name.to_str(name)}, {param}')
@@ -44,7 +44,8 @@ def main():
             '''for i in range(len(val)):
                 print(dic[n][i])
                 res += dic[n][i]+'#'''
-            content = val.encode()
+            content = val
+            #content = "Hello".encode()
             print(content)
             app.put_data(name, content=content, freshness_period=10000)
             print(f'<< D: {Name.to_str(name)}')

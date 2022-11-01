@@ -35,7 +35,6 @@ app = NDNApp()
 
 async def fetchKEKNames(ckName):
     name = Name.from_str(ckName)
-    #+ [Component.from_timestamp(timestamp)]
     print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
     data_name, meta_info, content = await app.express_interest(
         name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
@@ -49,10 +48,22 @@ def publishContent(contentName, content):
     def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
         n = Name.to_str(name)
         print(f'>> I: {Name.to_str(name)}, {param}')
-        app.put_data(name, content=content, freshness_period=10000)
+        app.put_data(n, content=content, freshness_period=10000)
         print(f'<< D: {Name.to_str(name)}')
         print(MetaInfo(freshness_period=10000))
         print(f'Content: (size: {len(content)})')
+        print('')
+        
+def publishCK(ckName, ck):
+    print(ckName)
+    @app.route(ckName)
+    def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+        n = Name.to_str(ckName)
+        print(f'>> I: {Name.to_str(name)}, {param}')
+        app.put_data(n, content=ck, freshness_period=10000)
+        print(f'<< D: {Name.to_str(name)}')
+        print(MetaInfo(freshness_period=10000))
+        #print(f'Content: (size: {len(content)})')
         print('')
         
 async def main():
@@ -67,26 +78,27 @@ async def main():
         
         #kekList = fetchKEKNames('/Alice/Home/NAC/KEKList/Home/livingroom/_/_/CK')
         #ckName = '/Alice/Home/NAC/KEKList/Home/livingroom/_/_/CK'
+        
         name = Name.from_str(keklistName)
-        #+ [Component.from_timestamp(timestamp)]
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
         data_name, meta_info, kekList = await app.express_interest(
             name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
-
-        print(f'Received Data Name: {Name.to_str(data_name)}')
-        print(meta_info)
-        print(bytes(kekList) if kekList else None)
     
         
         KekNames = enc.parseKEKNames(bytes(kekList))
         for KekName in KekNames:
-            print(KekName)
+            print(f'Sending Interest {Name.to_str(KekName)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
             data_name, meta_info, content = await app.express_interest(
                 KekName, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
-        #model = KEKListModel.parse(bytes(content))
-        #print(model.list)
+            print(f'Received Data Name: {Name.to_str(data_name)}')
+            print(meta_info)
+            print(bytes(content) if content else None)
+
         
-        encryptedContent = enc.encrypt_content('hola'.encode())
+        ck, encryptedContent = enc.encrypt_content(data_to_encrypt.encode())
+        print(ck)
+        ckName = enc.buildckName(contentName)
+        publishCK(ckName,ck)
         publishContent(contentName,encryptedContent)
     except InterestNack as e:
         print(f'Nacked with reason={e.reason}')

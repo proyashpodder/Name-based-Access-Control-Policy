@@ -10,29 +10,9 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     level=logging.INFO,
                     style='{')
 
+app = NDNApp()
 
-
-
-def main():
-    #dp = DecryptionPolicy(sys.argv[1])
-    #dic = dp.execute()
-    encSchema = sys.argv[1]
-    decSchema = sys.argv[2]
-    amPrefix = '/Alice/Home'
-    accessmanager = AccessManager(encSchema,decSchema,amPrefix)
-    #encDic = accessmanager.parse_encryption_schema()
-    #decDic = accessmanager.parse_decryption_schema()
-    kekDic = accessmanager.buildKEKNames()
-    #print(kekDic)
-    
-
-    app = NDNApp()
-    '''#dic = {'home/user/alice/key':['/home','/home/bedroom'],
-    #       'home/user/ruth/key':['home/guestroom'] }
-    #formatPrint(dic)'''
-    #dic = {'/edu/fiu/cs':['/student/proyash','/faculty/alex'],
-    #       '/edu/ucla/cs': ['/xinyu']}
-    # the consumer gets timeout. Maybe the issue can be wityh _ thing. check by removing that
+def publishKEKNames(kekDic):
     for key,val in kekDic.items():
         print(key,val)
         @app.route(key)
@@ -41,19 +21,15 @@ def main():
             print(f'>> I: {Name.to_str(name)}, {param}')
             res = ''
             val = kekDic[n]
-            '''for i in range(len(val)):
-                print(dic[n][i])
-                res += dic[n][i]+'#'''
             content = val
-            #content = "Hello".encode()
             print(content)
             app.put_data(name, content=content, freshness_period=10000)
             print(f'<< D: {Name.to_str(name)}')
             print(MetaInfo(freshness_period=10000))
             print(f'Content: (size: {len(content)})')
             print('')
-            
-    keks = accessmanager.buildKEKs(kekDic)
+
+def publishKEKs(keks):
     for name in keks:
         content = 'key'  #actual key needs to be generated
         print(name)
@@ -66,6 +42,17 @@ def main():
             print(MetaInfo(freshness_period=10000))
             print(f'Content: (size: {len(content)})')
             print('')
+
+def main():
+    encSchema = sys.argv[1]
+    decSchema = sys.argv[2]
+    amPrefix = '/Alice/Home'
+    accessmanager = AccessManager(encSchema,decSchema,amPrefix)
+    kekDic = accessmanager.buildKEKNames()
+    publishKEKNames(kekDic)
+            
+    keks = accessmanager.buildKEKs(kekDic)
+    publishKEKs(keks)
     print('Start serving ...')
     app.run_forever()
 

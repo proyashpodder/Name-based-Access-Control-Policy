@@ -23,6 +23,9 @@ class Encryptor:
         
     def buildKeklistName(self,contentName):
         return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
+    
+    def buildckName(self,contentName):
+        return contentName+'/_/_/CK'
         
     def generate_ck(self):
         ck = get_random_bytes(32)
@@ -32,7 +35,6 @@ class Encryptor:
         encryptedContent = EncryptedContent()
         encryptedContent.inner = NestedModel()
         ck = self.generate_ck()
-        print(ck)
         cipher_encrypt = AES.new(ck, AES.MODE_CFB)
         ciphered_bytes = cipher_encrypt.encrypt(content)
         iv = cipher_encrypt.iv
@@ -44,7 +46,7 @@ class Encryptor:
         
         
         
-        return encryptedContent.encode()
+        return ck, encryptedContent.encode()
         
 
 

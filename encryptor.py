@@ -16,12 +16,13 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     style='{')
 
 
-class KEKListModel(TlvModel):
-    list = RepeatedField(BytesField(0x83))
     
 class Encryptor:
     def __init__(self,amPrefix):
         self.amPrefix = amPrefix
+        
+    def buildKeklistName(self,contentName):
+        return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
         
     def generate_ck(self):
         ck = get_random_bytes(32)
@@ -39,6 +40,9 @@ class Encryptor:
         
         encryptedContent.inner.encryptedPayload = ciphered_data
         encryptedContent.inner.initializationVector = iv
+        
+        
+        
         
         return encryptedContent.encode()
         

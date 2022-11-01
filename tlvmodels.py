@@ -9,5 +9,9 @@ class NestedModel(TlvModel):
 
 class EncryptedContent(TlvModel):
     inner = ModelField(0x82,NestedModel)
+    
+    
+class KEKListModel(TlvModel):
+    list = RepeatedField(BytesField(0x83))
 
 

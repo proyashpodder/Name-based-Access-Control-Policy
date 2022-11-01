@@ -23,7 +23,7 @@ def main():
     #encDic = accessmanager.parse_encryption_schema()
     #decDic = accessmanager.parse_decryption_schema()
     kekDic = accessmanager.buildKEKNames()
-    print(kekDic)
+    #print(kekDic)
     
 
     app = NDNApp()
@@ -53,6 +53,19 @@ def main():
             print(f'Content: (size: {len(content)})')
             print('')
             
+    keks = accessmanager.buildKEKs(kekDic)
+    for name in keks:
+        content = 'key'  #actual key needs to be generated
+        print(name)
+        @app.route(name)
+        def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+            n = Name.to_str(name)
+            print(f'>> I: {Name.to_str(name)}, {param}')
+            app.put_data(name, content=content, freshness_period=10000)
+            print(f'<< D: {Name.to_str(name)}')
+            print(MetaInfo(freshness_period=10000))
+            print(f'Content: (size: {len(content)})')
+            print('')
     print('Start serving ...')
     app.run_forever()
 

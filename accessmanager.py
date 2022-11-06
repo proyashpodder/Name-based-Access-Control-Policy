@@ -8,13 +8,14 @@ from encryptionpolicy.run import EncryptionPolicy
 import sys
 from ndn.encoding import *
 from tlvmodels import *
+from encryption import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO,
                     style='{')
 
-app = NDNApp()
+#app = NDNApp()
 
 class KEKListModel(TlvModel):
     list = RepeatedField(BytesField(0x83))
@@ -49,6 +50,7 @@ class AccessManager():
             kekListModel.list = l
             res = kekListModel.encode()
             kekDic[k] = res
+        #print(kekDic)
         return kekDic
     
     def buildKEKs(self,dic):
@@ -61,11 +63,10 @@ class AccessManager():
                 #print(res)
                 #self.publishKEK(res)
             #print(model.list)
+        #print(res)
         return res
     
-    def publishKEK(self,name):
-        content = 'key'  #actual key needs to be generated
-        print(name)
+    def publishKEK(self,app,name,content):
         @app.route(name)
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
             n = Name.to_str(name)
@@ -75,6 +76,12 @@ class AccessManager():
             print(MetaInfo(freshness_period=10000))
             print(f'Content: (size: {len(content)})')
             print('')
+            
+    def publishKEKandKDK(self,app,keks):
+        for name in keks:
+            pubKey, privKey = generate_keys()
+            self.publishKEK(app, name, pubKey)
+            #publishKDKs(privKey)
             
                 
             

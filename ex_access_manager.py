@@ -4,6 +4,7 @@ from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
 import sys
 from accessmanager import AccessManager
+from encryption import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -29,19 +30,22 @@ def publishKEKNames(kekDic):
             print(f'Content: (size: {len(content)})')
             print('')
 
-def publishKEKs(keks):
+def publishKEKs(name,content):
+    @app.route(name)
+    def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+        n = Name.to_str(name)
+        print(f'>> I: {Name.to_str(name)}, {param}')
+        app.put_data(name, content=content, freshness_period=10000)
+        print(f'<< D: {Name.to_str(name)}')
+        print(MetaInfo(freshness_period=10000))
+        print(f'Content: (size: {len(content)})')
+        print('')
+
+def publishKEKandKDK(keks):
     for name in keks:
-        content = 'key'  #actual key needs to be generated
-        print(name)
-        @app.route(name)
-        def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
-            n = Name.to_str(name)
-            print(f'>> I: {Name.to_str(name)}, {param}')
-            app.put_data(name, content=content, freshness_period=10000)
-            print(f'<< D: {Name.to_str(name)}')
-            print(MetaInfo(freshness_period=10000))
-            print(f'Content: (size: {len(content)})')
-            print('')
+        pubKey, privKey = generate_keys()
+        publishKEKs(name, pubKey)
+        #publishKDKs(privKey)
 
 def main():
     encSchema = sys.argv[1]
@@ -52,7 +56,8 @@ def main():
     publishKEKNames(kekDic)
             
     keks = accessmanager.buildKEKs(kekDic)
-    publishKEKs(keks)
+    #publishKEKandKDK(keks)#needs to add a dictionary of KDKs too after parsing like kek
+    accessmanager.publishKEKandKDK(app, keks)
     print('Start serving ...')
     app.run_forever()
 

@@ -21,11 +21,11 @@ def main():
     amPrefix = '/Alice/Home'
     accessmanager = AccessManager(encSchema,decSchema,amPrefix)
     kekDic = accessmanager.buildKEKNames()
+    kdkDic = accessmanager.buildKDKs()
     accessmanager.publishKEKNames(app,kekDic)
             
     keks = accessmanager.buildKEKs(kekDic)
-    #publishKEKandKDK(keks)#needs to add a dictionary of KDKs too after parsing like kek
-    accessmanager.publishKEKandKDK(app, keks)
+    accessmanager.publishKEKandKDK(app, keks,kdkDic)
     print('Start serving ...')
     app.run_forever()
 

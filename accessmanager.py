@@ -1,6 +1,7 @@
 
 from typing import Optional
 from ndn.app import NDNApp
+from collections import defaultdict
 #from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
 from decryptionpolicy.run import DecryptionPolicy
@@ -19,6 +20,9 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
 
 class KEKListModel(TlvModel):
     list = RepeatedField(BytesField(0x83))
+    
+class KDKListModel(TlvModel):
+    list = RepeatedField(BytesField(0x84))
 
 class AccessManager():
     def __init__(self,encSchema,decSchema,amPrefix):
@@ -52,6 +56,25 @@ class AccessManager():
             kekDic[k] = res
         #print(kekDic)
         return kekDic
+        
+    def buildKDKs(self):
+        kdkDic = defaultdict(list)
+        dic = self.parse_decryption_schema()
+        print(dic)
+        for key,values in dic.items():
+            for val in values:
+                newKey = self.amPrefix+'/NAC'+val+'/KEK'
+                kdkDic[newKey].append(key)
+                #kdkList.append(self.amPrefix+'/NAC'+val+'/KDK/ENCRYPTED-BY'+key)
+        print(kdkDic)
+        return kdkDic
+    
+    def buildKDKnames(self,name,keys):
+        print(name,keys)
+        res = []
+        for key in keys:
+            res.append(name[:-4]+'/KDK/ENCRYPTED-BY'+key)
+        return res
     
     def buildKEKs(self,dic):
         res = []
@@ -77,12 +100,28 @@ class AccessManager():
             print(f'Content: (size: {len(content)})')
             print('')
             
-    def publishKEKandKDK(self,app,keks):
+    def publishKDK(self,app,name,content):
+        @app.route(name)
+        def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+            n = Name.to_str(name)
+            print(f'>> I: {Name.to_str(name)}, {param}')
+            app.put_data(name, content=content, freshness_period=10000)
+            print(f'<< D: {Name.to_str(name)}')
+            print(MetaInfo(freshness_period=10000))
+            print(f'Content: (size: {len(content)})')
+            print('')
+            
+    def publishKEKandKDK(self,app,keks,kdks):
         for name in keks:
             pubKey, privKey = generate_keys()
             self.publishKEK(app, name, pubKey)
             #publishKDKs(privKey)
-            
+            if(kdks[name]):
+                kdkList = self.buildKDKnames(name,kdks[name])
+                print (kdkList)
+                for kdkName in kdkList:
+                    self.publishKDK(app,kdkName,privKey) # need to encrypt by the key(e.g., alice's key, bob's key etc.
+                    
     def publishKEKNames(self,app,kekDic):
         for key,val in kekDic.items():
             print(key,val)

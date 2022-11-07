@@ -54,19 +54,15 @@ class AccessManager():
             kekListModel.list = l
             res = kekListModel.encode()
             kekDic[k] = res
-        #print(kekDic)
         return kekDic
         
     def buildKDKs(self):
         kdkDic = defaultdict(list)
         dic = self.parse_decryption_schema()
-        print(dic)
         for key,values in dic.items():
             for val in values:
                 newKey = self.amPrefix+'/NAC'+val+'/KEK'
                 kdkDic[newKey].append(key)
-                #kdkList.append(self.amPrefix+'/NAC'+val+'/KDK/ENCRYPTED-BY'+key)
-        print(kdkDic)
         return kdkDic
     
     def buildKDKnames(self,name,keys):
@@ -83,10 +79,6 @@ class AccessManager():
             for l in model.list:
                 gran = bytes(l).decode()
                 res.append (self.amPrefix+'/NAC'+gran+'/KEK')
-                #print(res)
-                #self.publishKEK(res)
-            #print(model.list)
-        #print(res)
         return res
     
     def publishKEK(self,app,name,content):
@@ -118,7 +110,7 @@ class AccessManager():
             #publishKDKs(privKey)
             if(kdks[name]):
                 kdkList = self.buildKDKnames(name,kdks[name])
-                print (kdkList)
+                #print (kdkList)
                 for kdkName in kdkList:
                     self.publishKDK(app,kdkName,privKey) # need to encrypt by the key(e.g., alice's key, bob's key etc.
                     

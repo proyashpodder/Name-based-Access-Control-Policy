@@ -26,10 +26,6 @@ class Encryptor:
         return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
     
     def buildckName(self,contentName,kek):
-        #res  = []
-        #for kek in keks:
-            #res.append(contentName+'/_/_/CK/ENCRYPTED-BY')
-        print(contentName)
         return contentName+'/_/_/CK/ENCRYPTED-BY'+ kek
         
     def generate_ck(self):
@@ -47,10 +43,7 @@ class Encryptor:
         
         encryptedContent.inner.encryptedPayload = ciphered_data
         encryptedContent.inner.initializationVector = iv
-        
-        
-        
-        
+
         return ck, encryptedContent.encode()
         
 
@@ -66,11 +59,9 @@ class Encryptor:
     def publishCK(self,app,contentName, ck,keks):
         for key,values in keks.items():
             ckName = self.buildckName(contentName,key)
-            #print (ckName, bytes(values))
+            print (ckName, bytes(values))
             pubKey = load_pub_key(bytes(values))
-            #print(pubKey)
             encryptedCK = encrypt(ck,pubKey)
-            #print(encryptedCK)
             @app.route(ckName)
             def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
                 n = Name.to_str(ckName)

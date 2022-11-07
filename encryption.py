@@ -18,6 +18,3 @@ def load_pub_key(pubKey):
 def encrypt(msg,key):
     return rsa.encrypt(msg,key)
 
-#pubKey,privKey = generate_keys()
-#load_keys(pubKey,privKey)
-

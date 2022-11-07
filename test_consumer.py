@@ -41,20 +41,25 @@ async def main():
         
         enc = Encryptor(amPrefix)
         
+        #build the Interest name to fetch the name of the KEK(s) needed to encrypt the CK
         keklistName = enc.buildKeklistName(contentName)
         
         
         #kekList = fetchKEKNames('/Alice/Home/NAC/KEKList/Home/livingroom/_/_/CK')
         #ckName = '/Alice/Home/NAC/KEKList/Home/livingroom/_/_/CK'
         
+        # send the Interest to fetch KEK names
         name = Name.from_str(keklistName)
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
         data_name, meta_info, kekList = await app.express_interest(
             name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
     
         
+        # parse the KEK names
         KekNames = enc.parseKEKNames(bytes(kekList))
         keks = {}
+        
+        # Send Interest to fetch KEK(s).
         for KekName in KekNames:
             print(f'Sending Interest {Name.to_str(KekName)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
             data_name, meta_info, kek = await app.express_interest(
@@ -65,10 +70,12 @@ async def main():
             keks[KekName] = kek
 
         
+        #encrypt content with CK
         ck, encryptedContent = enc.encrypt_content(data_to_encrypt.encode())
         #print(ck, encryptedContent)
         #ckNames = enc.buildckName(contentName)
-        #for kek in keks:
+        
+        #publish CK and Content
         enc.publishCK(app,contentName,ck,keks)
         enc.publishContent(app,contentName,encryptedContent)
     except InterestNack as e:

@@ -33,38 +33,6 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
 amPrefix = '/Alice/Home'
 app = NDNApp()
 
-async def fetchKEKNames(ckName):
-    name = Name.from_str(ckName)
-    print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
-    data_name, meta_info, content = await app.express_interest(
-        name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
-    print(f'Received Data Name: {Name.to_str(data_name)}')
-    print(meta_info)
-    print(bytes(content) if content else None)
-    return bytes(content)
-
-def publishContent(contentName, content):
-    @app.route(contentName)
-    def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
-        n = Name.to_str(name)
-        print(f'>> I: {Name.to_str(name)}, {param}')
-        app.put_data(n, content=content, freshness_period=10000)
-        print(f'<< D: {Name.to_str(name)}')
-        print(MetaInfo(freshness_period=10000))
-        print(f'Content: (size: {len(content)})')
-        print('')
-        
-def publishCK(ckName, ck):
-    print(ckName)
-    @app.route(ckName)
-    def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
-        n = Name.to_str(ckName)
-        print(f'>> I: {Name.to_str(name)}, {param}')
-        app.put_data(n, content=ck, freshness_period=10000)
-        print(f'<< D: {Name.to_str(name)}')
-        print(MetaInfo(freshness_period=10000))
-        #print(f'Content: (size: {len(content)})')
-        print('')
         
 async def main():
     try:
@@ -86,20 +54,23 @@ async def main():
     
         
         KekNames = enc.parseKEKNames(bytes(kekList))
+        keks = {}
         for KekName in KekNames:
             print(f'Sending Interest {Name.to_str(KekName)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
-            data_name, meta_info, content = await app.express_interest(
+            data_name, meta_info, kek = await app.express_interest(
                 KekName, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
             print(f'Received Data Name: {Name.to_str(data_name)}')
             print(meta_info)
-            print(bytes(content) if content else None)
+            print(bytes(kek) if kek else None)
+            keks[KekName] = kek
 
         
         ck, encryptedContent = enc.encrypt_content(data_to_encrypt.encode())
-        print(ck)
-        ckName = enc.buildckName(contentName)
-        publishCK(ckName,ck)
-        publishContent(contentName,encryptedContent)
+        #print(ck, encryptedContent)
+        #ckNames = enc.buildckName(contentName)
+        #for kek in keks:
+        enc.publishCK(app,contentName,ck,keks)
+        enc.publishContent(app,contentName,encryptedContent)
     except InterestNack as e:
         print(f'Nacked with reason={e.reason}')
     except InterestTimeout:

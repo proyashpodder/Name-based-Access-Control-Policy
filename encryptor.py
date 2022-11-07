@@ -9,6 +9,7 @@ from ndn.encoding import *
 from tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+from encryption import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -24,8 +25,12 @@ class Encryptor:
     def buildKeklistName(self,contentName):
         return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
     
-    def buildckName(self,contentName):
-        return contentName+'/_/_/CK'
+    def buildckName(self,contentName,kek):
+        #res  = []
+        #for kek in keks:
+            #res.append(contentName+'/_/_/CK/ENCRYPTED-BY')
+        print(contentName)
+        return contentName+'/_/_/CK/ENCRYPTED-BY'+ kek
         
     def generate_ck(self):
         ck = get_random_bytes(32)
@@ -57,3 +62,34 @@ class Encryptor:
             gran = bytes(l).decode()
             res.append(self.amPrefix+'/NAC'+gran+'/KEK')
         return res
+        
+    def publishCK(self,app,contentName, ck,keks):
+        for key,values in keks.items():
+            ckName = self.buildckName(contentName,key)
+            #print (ckName, bytes(values))
+            pubKey = load_pub_key(bytes(values))
+            #print(pubKey)
+            encryptedCK = encrypt(ck,pubKey)
+            #print(encryptedCK)
+            @app.route(ckName)
+            def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+                n = Name.to_str(ckName)
+                print(f'>> I: {Name.to_str(name)}, {param}')
+                app.put_data(n, content=encryptedCK, freshness_period=10000)
+                print(f'<< D: {Name.to_str(name)}')
+                print(MetaInfo(freshness_period=10000))
+                #print(f'Content: (size: {len(content)})')
+                print('')
+            
+            
+    def publishContent(self,app,contentName, content):
+        print(content, contentName)
+        @app.route(contentName)
+        def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+            n = Name.to_str(name)
+            print(f'>> I: {Name.to_str(name)}, {param}')
+            app.put_data(n, content=content, freshness_period=10000)
+            print(f'<< D: {Name.to_str(name)}')
+            print(MetaInfo(freshness_period=10000))
+            print(f'Content: (size: {len(content)})')
+            print('')

@@ -83,6 +83,23 @@ class AccessManager():
             self.publishKEK(app, name, pubKey)
             #publishKDKs(privKey)
             
+    def publishKEKNames(self,app,kekDic):
+        for key,val in kekDic.items():
+            print(key,val)
+            @app.route(key)
+            def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+                n = Name.to_str(name)
+                print(f'>> I: {Name.to_str(name)}, {param}')
+                res = ''
+                val = kekDic[n]
+                content = val
+                print(content)
+                app.put_data(name, content=content, freshness_period=10000)
+                print(f'<< D: {Name.to_str(name)}')
+                print(MetaInfo(freshness_period=10000))
+                print(f'Content: (size: {len(content)})')
+                print('')
+            
                 
             
         

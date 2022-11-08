@@ -29,7 +29,7 @@ class Encryptor:
         return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
     
     def buildckName(self,contentName,kek):
-        return contentName+'/_/_/CK/ENCRYPTED-BY'+ kek
+        return contentName+'/CK/ENCRYPTED-BY'+ kek
         
     def generate_ck(self):
         ck = get_random_bytes(32)
@@ -69,7 +69,7 @@ class Encryptor:
             l.append(key.encode())
         ckNamesModel.list = l
         res = ckNamesModel.encode()
-        print(name, res)
+        print(type(name), type(res))
         @app.route(name)
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
             n = Name.to_str(name)
@@ -77,27 +77,46 @@ class Encryptor:
             app.put_data(n, content=res, freshness_period=10000)
             print(f'<< D: {Name.to_str(name)}')
             print(MetaInfo(freshness_period=10000))
-            #print(f'Content: (size: {len(content)})')
+            print(f'Content: (size: {len(res)})')
             print('')
         
         
     def publishCK(self,app,contentName, ck,keks):
+        dic = {}
         for key,values in keks.items():
+            print(key,values)
             ckName = self.buildckName(contentName,key)
             print (ckName, bytes(values))
             pubKey = load_pub_key(bytes(values))
             encryptedCK = encrypt(ck,pubKey)
+            print(ckName,encryptedCK)
+            dic[ckName] = encryptedCK
+            print(encryptedCK, ckName)
+        #self.pc(app,dic)
             @app.route(ckName)
             def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
                 n = Name.to_str(ckName)
-                print(f'>> I: {Name.to_str(ckName)}, {param}')
-                app.put_data(n, content=encryptedCK, freshness_period=10000)
-                print(f'<< D: {Name.to_str(ckName)}')
+                print(f'>> I: {Name.to_str(n)}, {param}')
+                app.put_data(n, content= encryptedCK, freshness_period=10000)
+                print(f'<< D: {Name.to_str(n)}')
                 print(MetaInfo(freshness_period=10000))
                 print(f'Content: (size: {len(encryptedCK)})')
                 print('')
             
             
+    def pc(self,app,dic):
+        for key,val in dic.items():
+            print(type(val))
+            @app.route(key)
+            def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
+                n = Name.to_str(key)
+                print(f'>> I: {Name.to_str(n)}, {param}')
+                app.put_data(n, content= str(val), freshness_period=10000)
+                print(f'<< D: {Name.to_str(n)}')
+                print(MetaInfo(freshness_period=10000))
+                print(f'Content: (size: {len(val)})')
+                print('')
+    
     def publishContent(self,app,contentName, content):
         print(contentName, content)
         @app.route(contentName)

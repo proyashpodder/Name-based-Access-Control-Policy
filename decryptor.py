@@ -35,8 +35,8 @@ class Decryptor:
         return res
         
     def buildCKName(self,ckName,kekNames):
-        res = []
+        res = {}
         for kekName in kekNames:
-            res.append(ckName+kekName)
+            res[kekName] = ckName+'/ENCRYPTED-BY'+kekName
         return res
     

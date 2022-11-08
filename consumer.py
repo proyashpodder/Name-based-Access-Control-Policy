@@ -34,7 +34,7 @@ app = NDNApp()
 async def main():
     try:
         timestamp = ndn.utils.timestamp()
-        name = Name.from_str('/Home/livingroom/_/_/CK/ENCRYPTED-BY/Alice/Home/NAC/Home/livingroom/KEK') #+ [Component.from_timestamp(timestamp)]
+        name = Name.from_str('/Home/livingroom/_/_/CK/ENCRYPTED-BY/Alice/Home/NAC/Home/KEK') #+ [Component.from_timestamp(timestamp)]
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
         data_name, meta_info, content = await app.express_interest(
             name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)

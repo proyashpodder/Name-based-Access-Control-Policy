@@ -72,9 +72,8 @@ async def main():
         
         #encrypt content with CK
         ck, encryptedContent = enc.encrypt_content(data_to_encrypt.encode())
-        #print(ck, encryptedContent)
-        #ckNames = enc.buildckName(contentName)
-        
+        print(keks)
+        enc.publishCKNames(app,contentName,keks)
         #publish CK and Content
         enc.publishCK(app,contentName,ck,keks)
         enc.publishContent(app,contentName,encryptedContent)

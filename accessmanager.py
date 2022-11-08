@@ -116,7 +116,6 @@ class AccessManager():
                     
     def publishKEKNames(self,app,kekDic):
         for key,val in kekDic.items():
-            print(key,val)
             @app.route(key)
             def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
                 n = Name.to_str(name)
@@ -124,7 +123,7 @@ class AccessManager():
                 res = ''
                 val = kekDic[n]
                 content = val
-                print(content)
+                #print(content)
                 app.put_data(name, content=content, freshness_period=10000)
                 print(f'<< D: {Name.to_str(name)}')
                 print(MetaInfo(freshness_period=10000))

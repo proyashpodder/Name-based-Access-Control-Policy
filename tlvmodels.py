@@ -13,5 +13,9 @@ class EncryptedContent(TlvModel):
     
 class KEKListModel(TlvModel):
     list = RepeatedField(BytesField(0x83))
+    
+    
+class CKNamesModel(TlvModel):
+    list = RepeatedField(BytesField(0x86))
 
 

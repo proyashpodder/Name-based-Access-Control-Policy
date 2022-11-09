@@ -6,7 +6,10 @@ from ndn.types import InterestNack, InterestTimeout, InterestCanceled, Validatio
 from ndn.encoding import *
 from encryptor import Encryptor
 from decryptor import Decryptor
-from tlvmodels import KEKListModel
+from tlvmodels import *
+from encryption import *
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
@@ -30,6 +33,12 @@ async def main():
             name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
             
         print(encryptedContent)
+        encryptedModel = EncryptedContent.parse(encryptedContent)
+        print(bytes(encryptedModel.inner.encryptedPayload),type(encryptedModel),bytes(encryptedModel.inner.initializationVector))
+        encryptedPayload = bytes(encryptedModel.inner.encryptedPayload)
+        iv = bytes(encryptedModel.inner.initializationVector)
+        
+        
         
         ckName = '/Home/livingroom/_/_/CK'
         modCKName = 'Home/livingroom/CK'
@@ -38,16 +47,16 @@ async def main():
         data_name, meta_info, ckData = await app.express_interest(
             name, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
             
-        print(bytes(ckData))
+        #print(bytes(ckData))
         kekNames = dec.parseCKNames(ckData)
-        print(kekNames)
+        #print(kekNames)
         
         for kekName in kekNames:
             kdkName = kekName[:-4]+'/KDK/ENCRYPTED-BY'+ identity
             print(kdkName)
         
         ckNames = dec.buildCKName(modCKName,kekNames)
-        print(ckNames)
+        #print(ckNames)
         
         '''name = Name.from_str('/Home/livingroom/CK/ENCRYPTED-BY/Alice/Home/NAC/Home/livingroom/KEK')
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=18000)}')
@@ -67,10 +76,10 @@ async def main():
                     name, must_be_fresh=False, can_be_prefix=False, lifetime=6000)
                     
                 #if(encryptedCK):
-                print(encryptedCK)
-                print(str(name), key)
+                #print(encryptedCK)
+                #print(str(name), key)
                 kdkName = key[:-3]+'KDK/ENCRYPTED-BY'+ identity
-                print(kdkName)
+                #print(kdkName)
                 
                 try:
                     name = Name.from_str(kdkName)
@@ -78,7 +87,19 @@ async def main():
                     data_name, meta_info, kdk = await app.express_interest(
                     name, must_be_fresh=False, can_be_prefix=False, lifetime=6000)
                     
-                    print(bytes(kdk))
+                    #print(bytes(kdk))
+                    kdk = load_priv_key(bytes(kdk))
+                    #print(kdk)
+                    ck = decrypt(bytes(encryptedCK),kdk)
+                    print(ck)
+                    
+                    
+                    aes_dec = AES.new(ck, AES.MODE_CFB, iv=iv)
+                    msg = aes_dec.decrypt(encryptedPayload)
+                    print("the message is: ")
+                    print(msg, type(msg), str(msg))
+                    txt = msg.decode('utf-8')
+                    print(txt)
                 
                 except InterestNack as e:
                     print(f'Nacked with reason={e.reason}')
@@ -99,9 +120,6 @@ async def main():
             except ValidationFailure:
                 print(f'Data failed to validate')
                 
-        if(encryptedCK):
-            print(bytes(encryptedCK))
-            
         
         
         

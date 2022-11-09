@@ -43,6 +43,8 @@ class Encryptor:
         ciphered_bytes = cipher_encrypt.encrypt(content)
         iv = cipher_encrypt.iv
         ciphered_data = ciphered_bytes
+        print(ciphered_data,iv, type(ciphered_data
+        ),content)
         
         encryptedContent.inner.encryptedPayload = ciphered_data
         encryptedContent.inner.initializationVector = iv

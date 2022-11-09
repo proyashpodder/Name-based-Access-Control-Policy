@@ -60,10 +60,35 @@ async def main():
         
         for key,value in ckNames.items():
             try:
+                encryptedCK = ''
                 name = Name.from_str(value)
                 print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
                 data_name, meta_info, encryptedCK = await app.express_interest(
                     name, must_be_fresh=False, can_be_prefix=False, lifetime=6000)
+                    
+                #if(encryptedCK):
+                print(encryptedCK)
+                print(str(name), key)
+                kdkName = key[:-3]+'KDK/ENCRYPTED-BY'+ identity
+                print(kdkName)
+                
+                try:
+                    name = Name.from_str(kdkName)
+                    print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
+                    data_name, meta_info, kdk = await app.express_interest(
+                    name, must_be_fresh=False, can_be_prefix=False, lifetime=6000)
+                    
+                    print(bytes(kdk))
+                
+                except InterestNack as e:
+                    print(f'Nacked with reason={e.reason}')
+                except InterestTimeout:
+                    print(f'Timeout')
+                except InterestCanceled:
+                    print(f'Canceled')
+                except ValidationFailure:
+                    print(f'Data failed to validate')
+                    
                     
             except InterestNack as e:
                 print(f'Nacked with reason={e.reason}')

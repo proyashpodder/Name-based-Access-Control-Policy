@@ -93,6 +93,7 @@ class AccessManager():
             print('')
             
     def publishKDK(self,app,name,content):
+        print(name,content)
         @app.route(name)
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
             n = Name.to_str(name)
@@ -108,9 +109,10 @@ class AccessManager():
             pubKey, privKey = generate_keys()
             self.publishKEK(app, name, pubKey)
             #publishKDKs(privKey)
+            print(name, kdks)
             if(kdks[name]):
                 kdkList = self.buildKDKnames(name,kdks[name])
-                #print (kdkList)
+                print (kdkList)
                 for kdkName in kdkList:
                     self.publishKDK(app,kdkName,privKey) # need to encrypt by the key(e.g., alice's key, bob's key etc.
                     

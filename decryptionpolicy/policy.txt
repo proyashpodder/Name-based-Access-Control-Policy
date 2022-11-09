@@ -3,4 +3,4 @@ _network: "Home"
 
 ownerRole: #user WHERE {userID:"Alice"|"Bob"}
 
-ownerRule : [_network, _network/location WHERE {location: "bedroom"}] ENCRYPTEDBY ownerRole | guestrole
+ownerRule : [_network, _network/location WHERE {location: "bedroom"|"livingroom"}] ENCRYPTEDBY ownerRole | guestrole

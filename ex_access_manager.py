@@ -22,6 +22,7 @@ def main():
     accessmanager = AccessManager(encSchema,decSchema,amPrefix)
     kekDic = accessmanager.buildKEKNames()
     kdkDic = accessmanager.buildKDKs()
+    print(kdkDic)
     accessmanager.publishKEKNames(app,kekDic)
             
     keks = accessmanager.buildKEKs(kekDic)

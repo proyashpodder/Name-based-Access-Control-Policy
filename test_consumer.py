@@ -16,6 +16,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 import logging
+import sys
 from typing import Optional
 import ndn.utils
 from ndn.app import NDNApp
@@ -37,12 +38,19 @@ app = NDNApp()
 async def main():
     try:
         data_to_encrypt = 'hello world'
-        contentName = '/Home/livingroom'
+        contentName = '/Home/livingroom/camera/feed/1'
+        schema = sys.argv[1]
+        
         
         enc = Encryptor(amPrefix)
+        dic = enc.parseSchema(schema)
+        print(dic)
+        
+        KekNames = enc.getKEKName(dic,Name.from_str(contentName))
+        print(KekNames)
         
         #build the Interest name to fetch the name of the KEK(s) needed to encrypt the CK
-        keklistName = enc.buildKeklistName(contentName)
+        '''keklistName = enc.buildKeklistName(contentName)
         
         
         #kekList = fetchKEKNames('/Alice/Home/NAC/KEKList/Home/livingroom/_/_/CK')
@@ -56,7 +64,7 @@ async def main():
     
         
         # parse the KEK names
-        KekNames = enc.parseKEKNames(bytes(kekList))
+        KekNames = enc.parseKEKNames(bytes(kekList))'''
         keks = {}
         
         # Send Interest to fetch KEK(s).

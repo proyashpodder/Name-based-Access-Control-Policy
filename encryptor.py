@@ -25,6 +25,33 @@ class Encryptor:
     def __init__(self,amPrefix):
         self.amPrefix = amPrefix
         
+    def parseSchema(self,schema):
+        ep = EncryptionPolicy(schema)
+        return ep.execute()
+        
+    def getKEKGrans(self,dic,name):
+        try:
+            for key,val in dic.items():
+                key = Name.from_str(key)
+                for i,n in enumerate(key):
+                    if(Name.to_str([n])=='/_' or n == name[i]):
+                        if(i==len(key)-1):
+                            return val
+                        continue
+                    else:
+                        break
+        except:
+            return None
+    
+    def getKEKName(self,dic,name):
+        grans = self.getKEKGrans(dic,name)
+        res = []
+        for gran in grans:
+            res.append(self.amPrefix+'/NAC'+gran+'/KEK')
+        return res
+                
+            
+            
     def buildKeklistName(self,contentName):
         return self.amPrefix+'/NAC/KEKList'+contentName+'/_/_/CK'
     
@@ -63,7 +90,7 @@ class Encryptor:
         return res
         
     def publishCKNames(self,app,contentName,keks):
-        name = contentName+'/_/_/CK'
+        name = contentName+'/CK'
         res = []
         ckNamesModel = CKNamesModel()
         l = []

@@ -20,6 +20,9 @@ import ndn.utils
 from ndn.app import NDNApp
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 from ndn.encoding import Name, Component, InterestParam
+from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS
+from ndn.security import *
+import os,sys
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
@@ -27,14 +30,22 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     level=logging.INFO,
                     style='{')
 
+basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+tpm_path = os.path.join(basedir, 'privKeys')
+pib_path = os.path.join(basedir, 'pib.db')
 
+
+#keychain = resolve_keychain()
+k = KeychainSqlite3(pib_path, TpmFile(tpm_path))
 app = NDNApp()
-
+#k = KeychainSqlite3('','')
+#a = k.newKey()
+#a = k.touch_identity('/ndn/proyash')
 
 async def main():
     try:
         timestamp = ndn.utils.timestamp()
-        name = Name.from_str('/Alice/Home/NAC/Home/livingroom/KDK/ENCRYPTED-BY/Home/user/Alice/KEY') #+ [Component.from_timestamp(timestamp)]
+        name = Name.from_str('Alice/Home/NAC/Home/livingroom/KEK/KEY') #+ [Component.from_timestamp(timestamp)]
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
         data_name, meta_info, content = await app.express_interest(
             name, must_be_fresh=True, can_be_prefix=False, lifetime=600000)

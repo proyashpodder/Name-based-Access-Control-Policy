@@ -10,6 +10,11 @@ import sys
 from ndn.encoding import *
 from tlvmodels import *
 from encryption import *
+from ndn.security import *
+from hashlib import sha256
+from Crypto.PublicKey import ECC
+from ECIES import *
+
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -30,7 +35,10 @@ class AccessManager():
         self.decSchema = decSchema
         self.amPrefix = amPrefix
         
-    
+    def add_entity(self,keychain,name):
+        id = keychain.touch_identity(name)
+        #pubKey = id.default_key()
+            
     
 
     def parse_encryption_schema(self):
@@ -44,6 +52,7 @@ class AccessManager():
     def buildKEKNames(self):
         kekDic = {}
         dic = self.parse_encryption_schema()
+        print(dic)
         for key,values in dic.items():
             k = self.amPrefix + '/NAC/KEKList'+key+'/CK'
             
@@ -59,6 +68,7 @@ class AccessManager():
     def buildKDKs(self):
         kdkDic = defaultdict(list)
         dic = self.parse_decryption_schema()
+        #print(dic)
         for key,values in dic.items():
             for val in values:
                 newKey = self.amPrefix+'/NAC'+val+'/KEK'
@@ -70,7 +80,7 @@ class AccessManager():
         res = []
         for key in keys:
             res.append(name[:-4]+'/KDK/ENCRYPTED-BY'+key)
-        return res
+        return res,key
     
     def buildKEKs(self,dic):
         res = []
@@ -80,7 +90,43 @@ class AccessManager():
                 gran = bytes(l).decode()
                 res.append (self.amPrefix+'/NAC'+gran+'/KEK')
         return res
-    
+        
+    def run(self, app, keychain):
+        kekDic = self.parse_encryption_schema()
+        kdkDic = self.buildKDKs()
+
+        dic = {}
+        
+        
+        for key,values in kekDic.items():
+            for value in values:
+                name = self.amPrefix+'/NAC'+value+'/KEK'
+                id = keychain.touch_identity(name)
+                pubKey = id.default_key()
+                
+                self.publishKEK(app,Name.to_str(pubKey.name),pubKey.key_bits)
+
+                privKeyLoc = sha256(Name.to_bytes(pubKey.name)).digest().hex() + '.privkey'
+                f = open('privkeys/'+privKeyLoc)
+                privKey = f.read()
+                
+                
+                
+                
+                if(kdkDic[name]):
+                    kdkNames,key = self.buildKDKnames(name,kdkDic[name])
+
+                    for kdkName in kdkNames:
+                        decryptorEntity = Name.normalize(kdkName)[-4:]
+                        decryptorID = keychain.touch_identity(decryptorEntity)
+                        pubKey = decryptorID.default_key()
+
+                        #s = ECC.import_key(pubKey.key_bits)
+                        encryptedKDK = encrypt(ECC.import_key(pubKey.key_bits),privKey.encode())
+                        self.publishKDK(app,kdkName,encryptedKDK)
+
+            
+            
     def publishKEK(self,app,name,content):
         @app.route(name)
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
@@ -93,7 +139,7 @@ class AccessManager():
             print('')
             
     def publishKDK(self,app,name,content):
-        print(name,content)
+        #print(name,content)
         @app.route(name)
         def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
             n = Name.to_str(name)
@@ -109,10 +155,10 @@ class AccessManager():
             pubKey, privKey = generate_keys()
             self.publishKEK(app, name, pubKey)
             #publishKDKs(privKey)
-            print(name, kdks)
+            #print(name, kdks)
             if(kdks[name]):
                 kdkList = self.buildKDKnames(name,kdks[name])
-                print (kdkList)
+                #print (kdkList)
                 for kdkName in kdkList:
                     self.publishKDK(app,kdkName,privKey) # need to encrypt by the key(e.g., alice's key, bob's key etc.
                     

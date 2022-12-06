@@ -1,10 +1,10 @@
 import rsa
 def generate_keys():
     pubKey, privKey = rsa.newkeys(1024)
-    print(pubKey,privKey)
+    #print(pubKey,privKey)
     pubKey = pubKey.save_pkcs1('PEM')
     privKey = privKey.save_pkcs1('PEM')
-    print(pubKey,privKey)
+    #print(pubKey,privKey)
     return pubKey,privKey
 
 def load_keys(pubKey,prevKey):

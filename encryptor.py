@@ -4,12 +4,14 @@ from ndn.app import NDNApp
 import logging
 from decryptionpolicy.run import DecryptionPolicy
 from encryptionpolicy.run import EncryptionPolicy
-import sys
+import sys,os
 from ndn.encoding import *
+from ndn.security import *
 from tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from encryption import *
+from Crypto.PublicKey import ECC
+from ECIES import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -43,11 +45,15 @@ class Encryptor:
         except:
             return None
     
-    def getKEKName(self,dic,name):
+    def getKEKName(self,keychain, dic,name):
         grans = self.getKEKGrans(dic,name)
         res = []
         for gran in grans:
-            res.append(self.amPrefix+'/NAC'+gran+'/KEK')
+            s = self.amPrefix+'/NAC'+gran+'/KEK'
+            id = keychain.touch_identity(s)
+            n = id.default_key().name
+            print(n)
+            res.append(n)
         return res
                 
             
@@ -116,8 +122,9 @@ class Encryptor:
             print(key,values)
             ckName = self.buildckName(contentName,key)
             print (ckName, bytes(values))
-            pubKey = load_pub_key(bytes(values))
-            encryptedCK = encrypt(ck,pubKey)
+            #pubKey = load_pub_key(bytes(values))
+            #encryptedCK = encrypt(ck,pubKey)
+            encryptedCK = encrypt(ECC.import_key(values),ck)
             print(ckName,encryptedCK)
             dic[ckName] = encryptedCK
             print(encryptedCK, ckName)

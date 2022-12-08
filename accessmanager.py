@@ -21,7 +21,6 @@ logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     level=logging.INFO,
                     style='{')
 
-#app = NDNApp()
 
 class KEKListModel(TlvModel):
     list = RepeatedField(BytesField(0x83))
@@ -120,9 +119,11 @@ class AccessManager():
                         decryptorEntity = Name.normalize(kdkName)[-4:]
                         decryptorID = keychain.touch_identity(decryptorEntity)
                         pubKey = decryptorID.default_key()
+                        print(pubKey.key_bits)
 
                         #s = ECC.import_key(pubKey.key_bits)
                         encryptedKDK = encrypt(ECC.import_key(pubKey.key_bits),privKey.encode())
+                        print(kdkName)
                         self.publishKDK(app,kdkName,encryptedKDK)
 
             

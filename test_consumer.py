@@ -16,12 +16,13 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 import logging
-import sys
+import sys,os
 from typing import Optional
 import ndn.utils
 from ndn.app import NDNApp
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 from ndn.encoding import *
+from ndn.security import *
 from encryptor import Encryptor
 from tlvmodels import KEKListModel
 
@@ -37,6 +38,11 @@ app = NDNApp()
         
 async def main():
     try:
+        basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        tpm_path = os.path.join(basedir, 'privKeys')
+        pib_path = os.path.join(basedir, 'pib.db')
+        keychain = KeychainSqlite3(pib_path, TpmFile(tpm_path))
+        
         data_to_encrypt = 'hello world'
         contentName = '/Home/livingroom/camera/feed/1'
         schema = sys.argv[1]
@@ -46,7 +52,7 @@ async def main():
         dic = enc.parseSchema(schema)
         print(dic)
         
-        KekNames = enc.getKEKName(dic,Name.from_str(contentName))
+        KekNames = enc.getKEKName(keychain, dic,Name.from_str(contentName))
         print(KekNames)
         
         #build the Interest name to fetch the name of the KEK(s) needed to encrypt the CK
@@ -71,11 +77,11 @@ async def main():
         for KekName in KekNames:
             print(f'Sending Interest {Name.to_str(KekName)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
             data_name, meta_info, kek = await app.express_interest(
-                KekName, must_be_fresh=True, can_be_prefix=False, lifetime=6000)
+                KekName, must_be_fresh=True, can_be_prefix=True, lifetime=6000)
             print(f'Received Data Name: {Name.to_str(data_name)}')
             print(meta_info)
             print(bytes(kek) if kek else None)
-            keks[KekName] = kek
+            keks[Name.to_str(KekName)] = kek
 
         
         #encrypt content with CK

@@ -1,4 +1,5 @@
 import logging
+import os,sys
 from typing import Optional
 import ndn.utils
 from ndn.app import NDNApp
@@ -7,9 +8,13 @@ from ndn.encoding import *
 from encryptor import Encryptor
 from decryptor import Decryptor
 from tlvmodels import *
-from encryption import *
+from ndn.security import *
+from ECIES import *
+from hashlib import sha256
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+from Crypto.PublicKey import ECC
+from base64 import b64decode, b64encode
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
@@ -23,10 +28,25 @@ app = NDNApp()
         
 async def main():
     try:
+        basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        tpm_path = os.path.join(basedir, 'privKeys')
+        pib_path = os.path.join(basedir, 'pib.db')
+        keychain = KeychainSqlite3(pib_path, TpmFile(tpm_path))
+        
+        
         dec = Decryptor(amPrefix)
     
         contentName = '/Home/livingroom/camera/feed/1'
         identity = '/Home/user/Alice/KEY'
+        id = keychain.touch_identity(identity)
+        
+        privKeyLoc = sha256(Name.to_bytes(id.default_key().name)).digest().hex() + '.privkey'
+        f = open('privkeys/'+privKeyLoc, "rb")
+        privKey = f.read()
+        print(privKey)
+        print(type(privKey))
+        #print(type(privKey.encode()))
+        
         name = Name.from_str(contentName)
         print(f'Sending Interest {Name.to_str(name)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
         data_name, meta_info, encryptedContent = await app.express_interest(
@@ -78,8 +98,11 @@ async def main():
                 #if(encryptedCK):
                 print(encryptedCK)
                 #print(str(name), key)
-                kdkName = key[:-3]+'KDK/ENCRYPTED-BY'+ identity
-                #print(kdkName)
+                key = Name.normalize(key)
+                print(key)
+                kdkName = Name.to_str(key[:-3])+'/KDK/ENCRYPTED-BY'+ identity
+                
+                print(kdkName)
                 
                 try:
                     name = Name.from_str(kdkName)
@@ -88,9 +111,15 @@ async def main():
                     name, must_be_fresh=False, can_be_prefix=False, lifetime=6000)
                     
                     print(bytes(kdk))
-                    kdk = load_priv_key(bytes(kdk))
+                    #print(bytes(privKey))
+                    #kdk = load_priv_key(bytes(kdk))
                     #print(kdk)
-                    ck = decrypt(bytes(encryptedCK),kdk)
+                    k = ECC.import_key(b64decode(privKey))
+                    kdk = decrypt(k,bytes(kdk))
+                    print(kdk)
+                    
+                    
+                    ck = decrypt(ECC.import_key(b64decode(kdk)),bytes(encryptedCK))
                     print(ck)
                     
                     

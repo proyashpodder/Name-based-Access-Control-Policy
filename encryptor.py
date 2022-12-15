@@ -7,6 +7,7 @@ from encryptionpolicy.run import EncryptionPolicy
 import sys,os
 from ndn.encoding import *
 from ndn.security import *
+from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 from tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -27,9 +28,23 @@ class Encryptor:
     def __init__(self,amPrefix):
         self.amPrefix = amPrefix
         
+    
+        
     def parseSchema(self,schema):
         ep = EncryptionPolicy(schema)
         return ep.execute()
+        
+    async def fetchKEK(self,app,KekNames):
+        keks = {}
+        for KekName in KekNames:
+            print(f'Sending Interest {Name.to_str(KekName)}, {InterestParam(must_be_fresh=True, lifetime=6000)}')
+            data_name, meta_info, kek = await app.express_interest(
+                KekName, must_be_fresh=True, can_be_prefix=True, lifetime=6000)
+            print(f'Received Data Name: {Name.to_str(data_name)}')
+            print(meta_info)
+            print(bytes(kek) if kek else None)
+            keks[Name.to_str(KekName)] = kek
+        return keks
         
     def getKEKGrans(self,dic,name):
         try:
@@ -164,3 +179,22 @@ class Encryptor:
             print(MetaInfo(freshness_period=10000))
             print(f'Content: (size: {len(content)})')
             print('')
+            
+            
+    async def encode(self,app,keychain,schema,contentName,data_to_encrypt):
+        try:
+            dic = self.parseSchema(schema)
+            KekNames = self.getKEKName(keychain, dic,Name.from_str(contentName))
+            print(KekNames)
+            
+            
+            keks = await self.fetchKEK(app,KekNames)
+                
+            ck, encryptedContent = self.encrypt_content(data_to_encrypt.encode())
+            print(keks)
+            self.publishCKNames(app,contentName,keks)
+            #publish CK and Content
+            self.publishCK(app,contentName,ck,keks)
+            self.publishContent(app,contentName,encryptedContent)
+        except:
+            print('Something wrong')

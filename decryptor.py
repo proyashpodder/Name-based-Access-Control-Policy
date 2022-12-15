@@ -55,42 +55,7 @@ class Decryptor:
         privKey = f.read()
         return privKey
         
-    async def decode(self,app,keychain,contentName,identity):
-        id = keychain.touch_identity(identity)
-        privKey = self.getPrivkey(id)
-
-        encryptedPayload, iv = await self.fetchContent(app,contentName)
-        
-        
-        ckName = '/Home/livingroom/camera/feed/1/CK' #need to figure out how to get the CK name (either included in the encrypted payload or same prefix
-        ckData = await self.fetchCKData(app,ckName)
-        kekNames = self.parseCKNames(ckData)
-        ckNames = self.buildCKName(ckName,kekNames)
-        
-        
-        for key,value in ckNames.items():
-            try:
-                encryptedCK = await self.fetchEncryptedCK(app,value)
-                    
-                key = Name.normalize(key)
-                
-                kdkName = Name.to_str(key[:-3])+'/KDK/ENCRYPTED-BY'+ identity
-                
-                
-                encryptedKDK = await self.fetchKDK(app,kdkName)
-                    
-                print(bytes(encryptedKDK))
-                
-                kdk = self.decryptKDK(encryptedKDK,privKey)
-
-                
-                ck = self.decryptCK(encryptedCK,kdk)
-                
-                txt = self.decodeContent(encryptedPayload,ck,iv)
-
-            except:
-                print('Something wrong')
-        
+    
         
         
         
@@ -198,6 +163,43 @@ class Decryptor:
         txt = msg.decode()
         print(txt)
         return txt
+        
+    async def decode(self,app,keychain,contentName,identity):
+        id = keychain.touch_identity(identity)
+        privKey = self.getPrivkey(id)
+
+        encryptedPayload, iv = await self.fetchContent(app,contentName)
+        
+        
+        ckName = '/Home/livingroom/camera/feed/1/CK' #need to figure out how to get the CK name (either included in the encrypted payload or same prefix
+        ckData = await self.fetchCKData(app,ckName)
+        kekNames = self.parseCKNames(ckData)
+        ckNames = self.buildCKName(ckName,kekNames)
+        
+        
+        for key,value in ckNames.items():
+            try:
+                encryptedCK = await self.fetchEncryptedCK(app,value)
+                    
+                key = Name.normalize(key)
+                
+                kdkName = Name.to_str(key[:-3])+'/KDK/ENCRYPTED-BY'+ identity
+                
+                
+                encryptedKDK = await self.fetchKDK(app,kdkName)
+                    
+                print(bytes(encryptedKDK))
+                
+                kdk = self.decryptKDK(encryptedKDK,privKey)
+
+                
+                ck = self.decryptCK(encryptedCK,kdk)
+                
+                txt = self.decodeContent(encryptedPayload,ck,iv)
+
+            except:
+                print('Something wrong')
+        
     
                     
                     

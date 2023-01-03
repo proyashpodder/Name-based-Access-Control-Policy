@@ -23,8 +23,8 @@ from ndn.app import NDNApp
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 from ndn.encoding import *
 from ndn.security import *
-from encryptor import Encryptor
-from tlvmodels import KEKListModel
+from nac.encryptor import Encryptor
+from nac.tlvmodels import KEKListModel
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',

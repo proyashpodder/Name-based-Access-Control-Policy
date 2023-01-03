@@ -1,8 +1,8 @@
 from antlr4 import *
-from encryptionpolicy.epLexer import epLexer
-from encryptionpolicy.epListener import epListener
-from encryptionpolicy.epParser import epParser
-from encryptionpolicy.epVisitor import epVisitor
+from nac.encryptionpolicy.epLexer import epLexer
+from nac.encryptionpolicy.epListener import epListener
+from nac.encryptionpolicy.epParser import epParser
+from nac.encryptionpolicy.epVisitor import epVisitor
 import sys
 import binascii
 from collections import defaultdict

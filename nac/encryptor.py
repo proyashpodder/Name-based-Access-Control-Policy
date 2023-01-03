@@ -2,17 +2,17 @@ from typing import Optional
 from ndn.app import NDNApp
 #from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
-from decryptionpolicy.run import DecryptionPolicy
-from encryptionpolicy.run import EncryptionPolicy
+from nac.decryptionpolicy.run import DecryptionPolicy
+from nac.encryptionpolicy.run import EncryptionPolicy
 import sys,os
 from ndn.encoding import *
 from ndn.security import *
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
-from tlvmodels import *
+from nac.tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import ECC
-from ECIES import *
+from nac.ECIES import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',

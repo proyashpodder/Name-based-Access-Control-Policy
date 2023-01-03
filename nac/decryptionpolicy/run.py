@@ -1,8 +1,8 @@
 from antlr4 import *
-from decryptionpolicy.dpLexer import dpLexer
-from decryptionpolicy.dpListener import dpListener
-from decryptionpolicy.dpParser import dpParser
-from decryptionpolicy.dpVisitor import dpVisitor
+from nac.decryptionpolicy.dpLexer import dpLexer
+from nac.decryptionpolicy.dpListener import dpListener
+from nac.decryptionpolicy.dpParser import dpParser
+from nac.decryptionpolicy.dpVisitor import dpVisitor
 import sys
 import binascii
 #import decryptionpolicy.lib

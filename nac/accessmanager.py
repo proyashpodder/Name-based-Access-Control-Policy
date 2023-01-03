@@ -4,16 +4,16 @@ from ndn.app import NDNApp
 from collections import defaultdict
 #from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
-from decryptionpolicy.run import DecryptionPolicy
-from encryptionpolicy.run import EncryptionPolicy
+from nac.decryptionpolicy.run import DecryptionPolicy
+from nac.encryptionpolicy.run import EncryptionPolicy
 import sys
 from ndn.encoding import *
-from tlvmodels import *
-from encryption import *
+from nac.tlvmodels import *
+from nac.encryption import *
 from ndn.security import *
 from hashlib import sha256
 from Crypto.PublicKey import ECC
-from ECIES import *
+from nac.ECIES import *
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',

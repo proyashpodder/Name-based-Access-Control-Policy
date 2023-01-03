@@ -4,15 +4,15 @@ from ndn.app import NDNApp
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
 #from ndn.encoding import Name, InterestParam, BinaryStr, FormalName, MetaInfo
 import logging
-from decryptionpolicy.run import DecryptionPolicy
-from encryptionpolicy.run import EncryptionPolicy
+from nac.decryptionpolicy.run import DecryptionPolicy
+from nac.encryptionpolicy.run import EncryptionPolicy
 import sys
 from ndn.encoding import *
-from tlvmodels import *
+from nac.tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from encryption import *
-from ECIES import *
+from nac.encryption import *
+from nac.ECIES import *
 from hashlib import sha256
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes

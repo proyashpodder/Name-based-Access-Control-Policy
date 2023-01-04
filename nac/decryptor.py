@@ -8,11 +8,11 @@ from nac.decryptionpolicy.run import DecryptionPolicy
 from nac.encryptionpolicy.run import EncryptionPolicy
 import sys
 from ndn.encoding import *
-from nac.tlvmodels import *
+from nac.utils.tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from nac.encryption import *
-from nac.ECIES import *
+from nac.utils.encryption import *
+from nac.utils.ECIES import *
 from hashlib import sha256
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes

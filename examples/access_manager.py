@@ -6,7 +6,7 @@ import sys,os
 from ndn.security import TpmFile, KeychainSqlite3
 from ndn.app_support.light_versec import compile_lvs, Checker, DEFAULT_USER_FNS
 from nac.accessmanager import AccessManager
-from nac.encryption import *
+from nac.utils.encryption import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',

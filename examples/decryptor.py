@@ -7,9 +7,9 @@ from ndn.types import InterestNack, InterestTimeout, InterestCanceled, Validatio
 from ndn.encoding import *
 from nac.encryptor import Encryptor
 from nac.decryptor import Decryptor
-from nac.tlvmodels import *
+from nac.utils.tlvmodels import *
 from ndn.security import *
-from nac.ECIES import *
+from nac.utils.ECIES import *
 from hashlib import sha256
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes

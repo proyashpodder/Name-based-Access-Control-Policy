@@ -8,12 +8,12 @@ from nac.decryptionpolicy.run import DecryptionPolicy
 from nac.encryptionpolicy.run import EncryptionPolicy
 import sys
 from ndn.encoding import *
-from nac.tlvmodels import *
-from nac.encryption import *
+from nac.utils.tlvmodels import *
+from nac.utils.encryption import *
 from ndn.security import *
 from hashlib import sha256
 from Crypto.PublicKey import ECC
-from nac.ECIES import *
+from nac.utils.ECIES import *
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',

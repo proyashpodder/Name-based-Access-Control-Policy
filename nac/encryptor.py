@@ -8,21 +8,16 @@ import sys,os
 from ndn.encoding import *
 from ndn.security import *
 from ndn.types import InterestNack, InterestTimeout, InterestCanceled, ValidationFailure
-from nac.tlvmodels import *
+from nac.utils.tlvmodels import *
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import ECC
-from nac.ECIES import *
+from nac.utils.ECIES import *
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO,
                     style='{')
-
-
-
-
-
 
 class Encryptor:
     def __init__(self,amPrefix):

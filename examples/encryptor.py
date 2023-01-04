@@ -24,7 +24,7 @@ from ndn.types import InterestNack, InterestTimeout, InterestCanceled, Validatio
 from ndn.encoding import *
 from ndn.security import *
 from nac.encryptor import Encryptor
-from nac.tlvmodels import KEKListModel
+from nac.utils.tlvmodels import KEKListModel
 
 
 logging.basicConfig(format='[{asctime}]{levelname}:{message}',

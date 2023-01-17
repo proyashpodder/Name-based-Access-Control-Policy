@@ -227,6 +227,8 @@ class EncryptionPolicy:
                 name = defDict[name.value.value][0].value
             else:
                 name = name.value
+            
+            #print(name) #works fine
 
             for n in name:
                 if(n.value in idDict):
@@ -235,7 +237,7 @@ class EncryptionPolicy:
                     components.append(n.value)
                 else:
                     components.append('_')
-            #print(components)
+            #print(components) #works fine
             
             grans = values[1]
             granularities = []
@@ -249,7 +251,7 @@ class EncryptionPolicy:
                 else:
                     granularity.append(gran.value.value)
                 granularities.append(granularity)
-            #print(granularities)
+            #print(granularities) #works fine
             
             #print(grans)
             ### NEED TO HANDLE THE CONSTRAINTS PART
@@ -323,7 +325,7 @@ class EncryptionPolicy:
             except Exception as e:
                 print("\nSyntax error occurred in the policy file!\n")
                 sys.exit(1)
-            #formatPrint(defDict)
+            self.formatPrint(defDict)
             self.expand()
             self.formatPrint(KEKDict)
             return KEKDict

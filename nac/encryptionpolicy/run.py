@@ -178,7 +178,6 @@ class EncryptionPolicy:
             grans = []
             for i in ctx.granularity():
                 grans.append(i.accept(self))
-                #certDict[i.accept(self).value] = [-1,-1]
             return grans
         
         def visitUstring(self, ctx:epParser.UstringContext):
@@ -228,7 +227,7 @@ class EncryptionPolicy:
             else:
                 name = name.value
             
-            #print(name) #works fine
+            #print(name)
 
             for n in name:
                 if(n.value in idDict):
@@ -237,7 +236,7 @@ class EncryptionPolicy:
                     components.append(n.value)
                 else:
                     components.append('_')
-            #print(components) #works fine
+            #print(components)
             
             grans = values[1]
             granularities = []
@@ -253,8 +252,6 @@ class EncryptionPolicy:
                 granularities.append(granularity)
             #print(granularities) #works fine
             
-            #print(grans)
-            ### NEED TO HANDLE THE CONSTRAINTS PART
             cons = values[2][0]
             lis = list(product(*cons.values()))
             #print(lis)
@@ -328,6 +325,7 @@ class EncryptionPolicy:
             self.formatPrint(defDict)
             self.expand()
             self.formatPrint(KEKDict)
+            print(KEKDict)
             return KEKDict
 
     

@@ -1,0 +1,5 @@
+_network: "Home"
+
+#pub: _network/$location/events/value ENCRYPTEDBY [_network, _network/location] WHERE {location: "bedroom" | "livingroom"}
+
+bedroomPub: #pub ENCRYPTEDBY [_network/location] WHERE {location: "bedroom"}

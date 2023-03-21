@@ -138,7 +138,6 @@ class Encryptor:
             print(ckName,encryptedCK)
             dic[ckName] = encryptedCK
             print(encryptedCK, ckName)
-        #self.pc(app,dic)
             @app.route(ckName)
             def on_interest(name: FormalName, param: InterestParam, _app_param: Optional[BinaryStr]):
                 n = Name.to_str(ckName)

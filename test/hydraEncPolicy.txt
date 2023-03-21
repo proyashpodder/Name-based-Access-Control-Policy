@@ -1,0 +1,6 @@
+#pub: "hydra"/"genomics"/"file"/$sensitivitylevel/_
+unrestricted: #pub ENCRYPTEDBY [hydra] WHERE {sensitivitylevel: "unrestricted"}
+restricted: #pub ENCRYPTEDBY [hydra/genomics/$sensitivitylevel] WHERE {sensitivitylevel: "restricted"}
+confidential: #pub ENCRYPTEDBY [hydra/genomics/$sensitivitylevel] WHERE {sensitivitylevel: "confidential"}
+
+
